@@ -4,19 +4,28 @@ import Background from '../../components/Background';
 import { signOut } from '../../store/modules/auth/actions';
 import { updateProfileRequest } from '../../store/modules/user/actions';
 
-import { Container, Separator, Form, FormInput, SubmitButton, LogoutButton } from './styles';
+import {
+  Container,
+  Separator,
+  Form,
+  FormInput,
+  SubmitButton,
+  LogoutButton,
+} from './styles';
 
 export default function Profile() {
   const dispatch = useDispatch();
   const profile = useSelector(state => state.user.profile);
+  console.log('perfil', profile);
 
   const emailRef = useRef();
   const oldPasswordRef = useRef();
   const passwordRef = useRef();
   const confirmPasswordRef = useRef();
 
-  const [name, setName] = useState(profile.name);
-  const [email, setEmail] = useState(profile.email);
+  const [name, setName] = useState(profile.name_user);
+  const [valueFix, setValueFix] = useState(profile.value_fix);
+  const [percentage, setPercentage] = useState(profile.percentage);
   const [oldPassword, setOldPassword] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -28,14 +37,16 @@ export default function Profile() {
   }, [profile]);
 
   function handleSubmit() {
-    dispatch(updateProfileRequest({
-      name,
-      email,
-      oldPassword,
-      password,
-      confirmPassword,
-    }))
-  };
+    dispatch(
+      updateProfileRequest({
+        name,
+        email,
+        oldPassword,
+        password,
+        confirmPassword,
+      }),
+    );
+  }
 
   function handleLogout() {
     dispatch(signOut());
@@ -65,8 +76,21 @@ export default function Profile() {
             ref={emailRef}
             returnKeyType="next"
             onSubmitEditing={() => oldPasswordRef.current.focus()}
-            value={email}
-            onChangeText={setEmail}
+            value={valueFix}
+            onChangeText={setValueFix}
+          />
+
+          <FormInput
+            icon="mail-outline"
+            keyboardType="email-address"
+            autoCorrect={false}
+            autoCapitalize="none"
+            placeholder="Digite seu e-mail"
+            ref={emailRef}
+            returnKeyType="next"
+            onSubmitEditing={() => oldPasswordRef.current.focus()}
+            value={percentage}
+            onChangeText={setPercentage}
           />
 
           <Separator />
@@ -106,14 +130,9 @@ export default function Profile() {
             onChangeText={setConfirmPassword}
           />
 
+          <SubmitButton onPress={handleSubmit}>Atualizar perfil</SubmitButton>
 
-          <SubmitButton onPress={handleSubmit}>
-            Atualizar perfil
-          </SubmitButton>
-
-          <LogoutButton onPress={handleLogout}>
-            Sair do GoBarber
-          </LogoutButton>
+          <LogoutButton onPress={handleLogout}>Sair do GoBarber</LogoutButton>
         </Form>
       </Container>
     </Background>

@@ -1,21 +1,21 @@
 export function signInRequest(nameUser, password) {
   return {
     type: '@auth/SIGN_IN_REQUEST',
-    payload: {nameUser, password},
+    payload: { nameUser, password },
   };
 }
 
-export function signInSuccess(token, user) {
+export function signInSuccess(token, driver) {
   return {
     type: '@auth/SIGN_IN_SUCCESS',
-    payload: {token, user},
+    payload: { token, driver },
   };
 }
 
 export function signUpRequest(name, password, name_user, percentage, daily) {
   return {
     type: '@auth/SIGN_UP_REQUEST',
-    payload: {name, password, name_user, percentage, daily},
+    payload: { name, password, name_user, percentage, daily },
   };
 }
 

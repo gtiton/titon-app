@@ -1,15 +1,15 @@
-import {Alert} from 'react-native';
-import {takeLatest, call, put, all, delay} from 'redux-saga/effects';
-import {api} from '../../../services/api';
+import { Alert } from 'react-native';
+import { takeLatest, call, put, all, delay } from 'redux-saga/effects';
+import { api } from '../../../services/api';
 //import { toast } from "react-toastify";
 
 //import history from "../../../services/history";
 
-import {signInSuccess, signFailure} from './actions';
+import { signInSuccess, signFailure } from './actions';
 
-export function* signIn({payload}) {
+export function* signIn({ payload }) {
   try {
-    const {nameUser, password} = payload;
+    const { nameUser, password } = payload;
 
     const response = yield call(
       api.post,
@@ -24,15 +24,7 @@ export function* signIn({payload}) {
     );
     console.log('chamou ', response.data.dataResult);
 
-    const {token, drivers} = response.data.dataResult;
-
-    // if (user.provider) {
-    //   Alert.alert(
-    //     'Erro no login',
-    //     'O usuário não pode ser prestador de serviços',
-    //   );
-    //   return;
-    // }
+    const { token, drivers } = response.data.dataResult;
 
     api.defaults.headers.Authorization = `Bearer ${token}`;
 
@@ -42,17 +34,17 @@ export function* signIn({payload}) {
 
     history.push('/dashboard');
   } catch (err) {
-    Alert.alert(
-      'Falha na autenticação',
-      'Houve um erro no login, verifique seus dados',
-    );
     yield put(signFailure());
+    // Alert.alert(
+    //   'Falha na autenticação',
+    //   'Houve um erro no login, verifique seus dados',
+    // );
   }
 }
 
-export function* signUp({payload}) {
+export function* signUp({ payload }) {
   try {
-    const {name, password, name_user, percentage, daily} = payload;
+    const { name, password, name_user, percentage, daily } = payload;
 
     yield call(api.post, 'driver/register', {
       name,
@@ -72,10 +64,10 @@ export function* signUp({payload}) {
   }
 }
 
-export function setToken({payload}) {
+export function setToken({ payload }) {
   if (!payload) return;
 
-  const {token} = payload.auth;
+  const { token } = payload.auth;
 
   if (token) {
     api.defaults.headers.Authorization = `Bearer ${token}`;
