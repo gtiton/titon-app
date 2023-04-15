@@ -55,10 +55,10 @@ export default function SignIn({ navigation }) {
     });
   }, []);
 
-  const animatedHeight = animation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['100%', '55%'], // defina o tamanho que você quer que o componente tenha após a animação
-  });
+  // const animatedHeight = animation.interpolate({
+  //   inputRange: [0, 1],
+  //   outputRange: ['100%', '55%'], // defina o tamanho que você quer que o componente tenha após a animação
+  // });
 
   const AnimatedStyledComponent = styledComponentsNative(Animated.View)`
     background: #2b2b2c;
@@ -77,64 +77,68 @@ export default function SignIn({ navigation }) {
         <ImageBackground
           source={backgroudImageLogin}
           resizeMode="cover"
-          style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+          style={{
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}>
           <KeyboardAvoidingView
             behavior={'padding'}
             style={{
               flex: 1,
               justifyContent: 'flex-end',
             }}>
-            <AnimatedStyledComponent style={{ height: animatedHeight }}>
+            {/* <AnimatedStyledComponent style={{ height: 300 }}> */}
+            <Image
+              source={logo}
+              style={{
+                width: 300,
+                height: 42,
+                display: `${statusHeight ? 'none' : 'flex'}`,
+              }}
+            />
+            <Container status={statusHeight ? 'flex' : 'none'}>
               <Image
                 source={logo}
-                style={{
-                  width: 300,
-                  height: 42,
-                  display: `${statusHeight ? 'none' : 'flex'}`,
-                }}
+                style={{ width: 236, height: 32, marginBottom: 50 }}
               />
-              <Container status={statusHeight ? 'flex' : 'none'}>
-                <Image
-                  source={logo}
-                  style={{ width: 236, height: 32, marginBottom: 50 }}
+              <Form>
+                <FormInput
+                  icon="account-circle"
+                  // keyboardType="email-address"
+                  autoCorrect={false}
+                  autoCapitalize="none"
+                  placeholder="Digite seu nome de usúario"
+                  returnKeyType="next"
+                  onSubmitEditing={() => passwordRef.current.focus()}
+                  value={nameUser}
+                  onChangeText={setNameUser}
+                  ref={inputRef}
                 />
-                <Form>
-                  <FormInput
-                    icon="account-circle"
-                    keyboardType="email-address"
-                    autoCorrect={false}
-                    autoCapitalize="none"
-                    placeholder="Digite seu nome de usúario"
-                    returnKeyType="next"
-                    onSubmitEditing={() => passwordRef.current.focus()}
-                    value={nameUser}
-                    onChangeText={setNameUser}
-                    ref={inputRef}
-                  />
 
-                  <FormInput
-                    icon="lock-outline"
-                    secureTextEntry
-                    placeholder="Senha"
-                    ref={passwordRef}
-                    returnKeyType="send"
-                    onSubmitEditing={handleSubmit}
-                    value={password}
-                    onChangeText={setPassword}
-                  />
-                  <SignLink
-                    onPress={() => {
-                      navigation.navigate('SignUp');
-                    }}>
-                    <SignLinkText>Esqueceu sua senha?</SignLinkText>
-                  </SignLink>
+                <FormInput
+                  icon="lock-outline"
+                  secureTextEntry
+                  placeholder="Senha"
+                  ref={passwordRef}
+                  returnKeyType="send"
+                  onSubmitEditing={handleSubmit}
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <SignLink
+                  onPress={() => {
+                    navigation.navigate('SignUp');
+                  }}>
+                  <SignLinkText>Esqueceu sua senha?</SignLinkText>
+                </SignLink>
 
-                  <SubmitButton loading={loading} onPress={handleSubmit}>
-                    Login
-                  </SubmitButton>
-                </Form>
-              </Container>
-            </AnimatedStyledComponent>
+                <SubmitButton loading={loading} onPress={handleSubmit}>
+                  Login
+                </SubmitButton>
+              </Form>
+            </Container>
+            {/* </AnimatedStyledComponent> */}
           </KeyboardAvoidingView>
         </ImageBackground>
       </View>
