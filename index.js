@@ -15,6 +15,7 @@ if (Platform.OS == 'ios') {
   registerRootComponent(App);
 } else {
   console.log('entro segunda opção');
+  registerRootComponent(App);
 
-  AppRegistry.registerComponent(appName, () => App);
+ // AppRegistry.registerComponent(appName, () => App);
 }
