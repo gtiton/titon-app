@@ -1,0 +1,198 @@
+name: CI/CD Front - Staging
+
+on:
+  push:
+    branches:
+      - staging
+      - master
+      - 'feat/**'
+      - 'fix/**'
+      - 'docs/**'
+      - 'refactor/**'
+      - 'test/**'
+      - 'chore/**'
+      - 'style/**'
+      - 'perf/**'
+      - 'build/**'
+      - 'ci/**'
+      - 'revert/**'
+      - 'release/**'
+      - 'hotfix/**'
+      - 'feature/**'
+
+env:
+  NODE_VERSION: 20.12.2
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: yarn config set registry https://registry.npmjs.org
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+      - name: Install dependencies with retry
+        run: |
+          for i in 1 2; do
+            yarn install --frozen-lockfile && break
+            echo "Retrying yarn install in 5s..."
+            sleep 5
+          done
+      - run: yarn lint
+
+  style:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: yarn config set registry https://registry.npmjs.org
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+      - name: Install dependencies with retry
+        run: |
+          for i in 1 2; do
+            yarn install --frozen-lockfile && break
+            echo "Retrying yarn install in 5s..."
+            sleep 5
+          done
+      - run: yarn style:check
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: yarn config set registry https://registry.npmjs.org
+      - name: Install dependencies with retry
+        run: |
+          for i in 1 2; do
+            yarn install --frozen-lockfile && break
+            echo "Retrying yarn install in 5s..."
+            sleep 5
+          done
+      - run: yarn test --watchAll=false
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: yarn config set registry https://registry.npmjs.org
+      - name: Install dependencies with retry
+        run: |
+          for i in 1 2; do
+            yarn install --frozen-lockfile && break
+            echo "Retrying yarn install in 5s..."
+            sleep 5
+          done
+      - run: yarn build:web
+      - name: Upload build
+        uses: actions/upload-artifact@v3
+        with:
+          name: web-build
+          path: web-build/
+          retention-days: 7
+
+  check-code-quality:
+    runs-on: ubuntu-latest
+    needs: [lint, style, test, build]
+    steps:
+      - run: echo "✔️ Código validado com sucesso"
+
+  deploy:
+    needs: check-code-quality
+    if: github.event_name == 'push' && contains('refs/heads/staging,refs/heads/master', github.ref)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: yarn config set registry https://registry.npmjs.org
+      - name: Install dependencies with retry
+        run: |
+          for i in 1 2; do
+            yarn install --frozen-lockfile && break
+            echo "Retrying yarn install in 5s..."
+            sleep 5
+          done
+      - name: Deploy to Expo
+        run: |
+          npm install -g @expo/cli@latest
+          expo publish --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+  notify-discord:
+    needs: [lint, style, test, build, check-code-quality, deploy]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check if webhook is defined
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK" ]; then
+            echo "❌ DISCORD_WEBHOOK is NOT set"
+            exit 1
+          else
+            echo "✅ DISCORD_WEBHOOK is set"
+          fi
+
+      - name: Prepare Discord message
+        id: format_message
+        run: |
+          format_status() {
+            case "$1" in
+              success) echo "✅ success" ;;
+              failure) echo "❌ failure" ;;
+              cancelled) echo "⚠️ cancelled" ;;
+              *) echo "⏭️ skipped" ;;
+            esac
+          }
+
+          {
+            echo "🔔 **CI/CD Front - Staging**"
+            echo "**Branch**: \`${{ github.ref_name }}\`"
+            echo "**Autor**: \`${{ github.actor }}\`"
+            echo "**Status por etapa:**"
+            echo "- 🧹 Lint: $(format_status '${{ needs.lint.result }}')"
+            echo "- 🎨 Style: $(format_status '${{ needs.style.result }}')"
+            echo "- 🧪 Test: $(format_status '${{ needs.test.result }}')"
+            echo "- 🏗️ Build: $(format_status '${{ needs.build.result }}')"
+            echo "- ✅ Code Quality: $(format_status '${{ needs.check-code-quality.result }}')"
+            echo "- 🚀 Deploy: $(format_status '${{ needs.deploy.result || 'skipped' }}')"
+            echo "👉 [Ver execução](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          } > message.txt
+
+          echo "message<<EOF" >> $GITHUB_OUTPUT
+          cat message.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Send Discord Notification
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: ${{ steps.format_message.outputs.message }}
