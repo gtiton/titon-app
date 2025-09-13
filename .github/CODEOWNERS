@@ -1,0 +1,27 @@
+# Arquivo CODEOWNERS - Define quem aprova mudanças no projeto
+# Cada linha é um padrão de arquivo seguido de um ou mais usuários
+
+# Aprovação geral do projeto
+* @Henrique-Hoinacki-work @Henrique-Hoi-Dev
+
+# Configurações específicas do GitHub
+.github/ @Henrique-Hoinacki-work @Henrique-Hoi-Dev
+
+# Workflows e CI/CD
+.github/workflows/ @Henrique-Hoinacki-work @Henrique-Hoi-Dev
+
+# Configurações do projeto
+package.json @Henrique-Hoinacki-work @Henrique-Hoi-Dev
+yarn.lock @Henrique-Hoinacki-work @Henrique-Hoi-Dev
+app.json @Henrique-Hoinacki-work @Henrique-Hoi-Dev
+
+# Código fonte principal
+src/ @Henrique-Hoinacki-work @Henrique-Hoi-Dev
+
+# Configurações de build
+metro.config.js @Henrique-Hoinacki-work @Henrique-Hoi-Dev
+babel.config.js @Henrique-Hoinacki-work @Henrique-Hoi-Dev
+
+# Documentação
+README.md @Henrique-Hoinacki-work @Henrique-Hoi-Dev
+docs/ @Henrique-Hoinacki-work @Henrique-Hoi-Dev
